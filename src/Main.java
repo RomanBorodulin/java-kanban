@@ -19,7 +19,7 @@ public class Main {
         Epic secondEpic = new Epic("Важный эпик 2", "Очень важный");
         manager.createEpic(secondEpic);
         epicId = secondEpic.getId();
-        manager.createSubtask(new Subtask("Задача 1", "", TaskStatus.NEW, epicId));
+        manager.createSubtask(new Subtask("Задача 1", "", TaskStatus.DONE, epicId));
         for (Task task : manager.getListOfAllTasks()) {
             System.out.println(task);
         }
@@ -36,8 +36,12 @@ public class Main {
             manager.updateSubtask(subtask);
         }
         subtasks.get(0).setTaskStatus(TaskStatus.IN_PROGRESS);
+        subtasks.get(0).setName("Измененная подзадача о переезде");
+        subtasks.get(0).setId(10); // Значение ID не изменилось
         manager.updateSubtask(subtasks.get(0));
+        System.out.println(subtasks.get(0));
         for (Epic epic : manager.getListOfAllEpics()) {
+            epic.setTaskStatus(TaskStatus.NEW); // Значение статуса Эпика не изменилось
             System.out.println(epic);
         }
         System.out.println("------------------------------------------------------------------");
@@ -45,13 +49,10 @@ public class Main {
         //manager.deleteAllSubtasks();
         System.out.println(manager.getListOfAllEpics());
         System.out.println(manager.getListOfAllSubtasks());
-        //manager.deleteEpicById(1);
-        manager.deleteAllEpics();
+        manager.deleteEpicById(1);
+        //manager.deleteAllEpics();
         System.out.println(manager.getListOfAllEpics());
         System.out.println(manager.getListOfAllSubtasks());
-        manager.getSubtaskById(2).setName("Собрать книги");
-
-        manager.updateSubtask(manager.getSubtaskById(2));
 
     }
 
