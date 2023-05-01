@@ -38,6 +38,9 @@ public class Task {
     }
 
     public void setId(int id) {
+        if (this.id != 0) {
+            return;
+        }
         this.id = id;
     }
 
