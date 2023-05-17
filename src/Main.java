@@ -2,14 +2,17 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.TaskStatus;
-import service.Manager;
+import service.Managers;
+import service.TaskManager;
+
+
 
 import java.util.ArrayList;
 
 public class Main {
 
     public static void main(String[] args) {
-        Manager manager = new Manager();
+        TaskManager manager = Managers.getDefault();
         Epic firstEpic = new Epic("Переезд", "");
         manager.createEpic(firstEpic);
         int epicId = firstEpic.getId();
@@ -20,6 +23,7 @@ public class Main {
         manager.createEpic(secondEpic);
         epicId = secondEpic.getId();
         manager.createSubtask(new Subtask("Задача 1", "", TaskStatus.DONE, epicId));
+        manager.createTask(new Task("Задача", "", TaskStatus.IN_PROGRESS));
         for (Task task : manager.getListOfAllTasks()) {
             System.out.println(task);
         }
@@ -45,14 +49,29 @@ public class Main {
             System.out.println(epic);
         }
         System.out.println("------------------------------------------------------------------");
-        manager.deleteSubtaskById(5);
-        //manager.deleteAllSubtasks();
-        System.out.println(manager.getListOfAllEpics());
-        System.out.println(manager.getListOfAllSubtasks());
-        manager.deleteEpicById(1);
-        //manager.deleteAllEpics();
-        System.out.println(manager.getListOfAllEpics());
-        System.out.println(manager.getListOfAllSubtasks());
+//        manager.deleteSubtaskById(5);
+//        //manager.deleteAllSubtasks();
+//        System.out.println(manager.getListOfAllEpics());
+//        System.out.println(manager.getListOfAllSubtasks());
+//        manager.deleteEpicById(1);
+//        //manager.deleteAllEpics();
+//        System.out.println(manager.getListOfAllEpics());
+//        System.out.println(manager.getListOfAllSubtasks());
+        System.out.println("------------------------------------------------------------------");
+        manager.getEpicById(1);
+        manager.getEpicById(4);
+        manager.getSubtaskById(3);
+        manager.getSubtaskById(2);
+        manager.getSubtaskById(1); // не попадет в историю просмотров, так как не существует
+        manager.getTaskById(6);
+        manager.getSubtaskById(5);
+        manager.getEpicById(1);
+        manager.getSubtaskById(2);
+        manager.getSubtaskById(2);
+        manager.getTaskById(6);
+        manager.getEpicById(1);
+        System.out.println(manager.getHistory());
+
 
     }
 
