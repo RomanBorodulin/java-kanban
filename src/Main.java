@@ -47,8 +47,8 @@ public class Main {
         manager.updateEpic(firstEpic);
         System.out.println(manager.getListOfAllEpics());
         System.out.println("------------------------------------------------------------------");
-        manager.deleteSubtaskById(5);
-/*        //manager.deleteAllSubtasks();
+/*        manager.deleteSubtaskById(5);
+        //manager.deleteAllSubtasks();
         System.out.println(manager.getListOfAllEpics());
         System.out.println(manager.getListOfAllSubtasks());
         manager.deleteEpicById(1);
@@ -69,7 +69,6 @@ public class Main {
         manager.getTaskById(6);
         manager.getEpicById(1);
         System.out.println(manager.getHistory());
-
 
     }
 
