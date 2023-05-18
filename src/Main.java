@@ -6,7 +6,6 @@ import service.Managers;
 import service.TaskManager;
 
 
-
 import java.util.ArrayList;
 
 public class Main {
@@ -44,19 +43,18 @@ public class Main {
         subtasks.get(0).setId(10); // Значение ID не изменилось
         manager.updateSubtask(subtasks.get(0));
         System.out.println(subtasks.get(0));
-        for (Epic epic : manager.getListOfAllEpics()) {
-            epic.setTaskStatus(TaskStatus.NEW); // Значение статуса Эпика не изменилось
-            System.out.println(epic);
-        }
+        firstEpic.setDescription("Обновили описание");
+        manager.updateEpic(firstEpic);
+        System.out.println(manager.getListOfAllEpics());
         System.out.println("------------------------------------------------------------------");
-//        manager.deleteSubtaskById(5);
-//        //manager.deleteAllSubtasks();
-//        System.out.println(manager.getListOfAllEpics());
-//        System.out.println(manager.getListOfAllSubtasks());
-//        manager.deleteEpicById(1);
-//        //manager.deleteAllEpics();
-//        System.out.println(manager.getListOfAllEpics());
-//        System.out.println(manager.getListOfAllSubtasks());
+        manager.deleteSubtaskById(5);
+/*        //manager.deleteAllSubtasks();
+        System.out.println(manager.getListOfAllEpics());
+        System.out.println(manager.getListOfAllSubtasks());
+        manager.deleteEpicById(1);
+        //manager.deleteAllEpics();
+        System.out.println(manager.getListOfAllEpics());
+        System.out.println(manager.getListOfAllSubtasks());*/
         System.out.println("------------------------------------------------------------------");
         manager.getEpicById(1);
         manager.getEpicById(4);
