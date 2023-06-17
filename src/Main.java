@@ -5,69 +5,41 @@ import model.TaskStatus;
 import service.Managers;
 import service.TaskManager;
 
-
-import java.util.ArrayList;
-
 public class Main {
 
     public static void main(String[] args) {
         TaskManager manager = Managers.getDefault();
-        Epic firstEpic = new Epic("Переезд", "");
+
+        manager.createTask(new Task("Прочитать книгу", "", TaskStatus.IN_PROGRESS)); //#1
+        manager.createTask(new Task("Протестировать программу", "", TaskStatus.IN_PROGRESS)); //#2
+
+        Epic firstEpic = new Epic("Переезд", ""); //#3
         manager.createEpic(firstEpic);
         int epicId = firstEpic.getId();
-        manager.createSubtask(new Subtask("Собрать коробки", "", TaskStatus.NEW, epicId));
-        manager.createSubtask(new Subtask("Упаковать кошку", "", TaskStatus.NEW, epicId));
+        manager.createSubtask(new Subtask("Собрать коробки", "", TaskStatus.NEW, epicId)); //#4
+        manager.createSubtask(new Subtask("Упаковать кошку", "", TaskStatus.NEW, epicId)); //#5
+        manager.createSubtask(new Subtask("Заказать перевозку", "", TaskStatus.NEW, epicId)); //#6
 
-        Epic secondEpic = new Epic("Важный эпик 2", "Очень важный");
+        Epic secondEpic = new Epic("Важный эпик 2", "Очень важный без подзадач"); //#7
         manager.createEpic(secondEpic);
-        epicId = secondEpic.getId();
-        manager.createSubtask(new Subtask("Задача 1", "", TaskStatus.DONE, epicId));
-        manager.createTask(new Task("Задача", "", TaskStatus.IN_PROGRESS));
-        for (Task task : manager.getListOfAllTasks()) {
-            System.out.println(task);
-        }
-        for (Epic epic : manager.getListOfAllEpics()) {
-            System.out.println(epic);
-        }
-        for (Subtask subtask : manager.getListOfAllSubtasks()) {
-            System.out.println(subtask);
-        }
-        System.out.println("------------------------------------------------------------------");
-        ArrayList<Subtask> subtasks = manager.getListOfAllSubtasks();
-        for (Subtask subtask : subtasks) {
-            subtask.setTaskStatus(TaskStatus.DONE);
-            manager.updateSubtask(subtask);
-        }
-        subtasks.get(0).setTaskStatus(TaskStatus.IN_PROGRESS);
-        subtasks.get(0).setName("Измененная подзадача о переезде");
-        subtasks.get(0).setId(10); // Значение ID не изменилось
-        manager.updateSubtask(subtasks.get(0));
-        System.out.println(subtasks.get(0));
-        firstEpic.setDescription("Обновили описание");
-        manager.updateEpic(firstEpic);
-        System.out.println(manager.getListOfAllEpics());
-        System.out.println("------------------------------------------------------------------");
-/*        manager.deleteSubtaskById(5);
-        //manager.deleteAllSubtasks();
-        System.out.println(manager.getListOfAllEpics());
-        System.out.println(manager.getListOfAllSubtasks());
-        manager.deleteEpicById(1);
-        //manager.deleteAllEpics();
-        System.out.println(manager.getListOfAllEpics());
-        System.out.println(manager.getListOfAllSubtasks());*/
-        System.out.println("------------------------------------------------------------------");
-        manager.getEpicById(1);
-        manager.getEpicById(4);
-        manager.getSubtaskById(3);
-        manager.getSubtaskById(2);
-        manager.getSubtaskById(1); // не попадет в историю просмотров, так как не существует
-        manager.getTaskById(6);
+
+        manager.getTaskById(1);
+        manager.getTaskById(2);
+        manager.getEpicById(3);
         manager.getSubtaskById(5);
-        manager.getEpicById(1);
-        manager.getSubtaskById(2);
-        manager.getSubtaskById(2);
-        manager.getTaskById(6);
-        manager.getEpicById(1);
+        manager.getSubtaskById(4);
+        manager.getTaskById(1);
+        manager.getSubtaskById(5);
+        manager.getSubtaskById(6);
+        System.out.println(manager.getHistory()); // 2-3-4-1-5-6
+        System.out.println("------------------------------------------------------------------");
+        manager.deleteTaskById(1); // 2-3-4-5-6
+        //manager.deleteAllEpics(); // 2-1
+        //manager.deleteAllTasks(); // 3-4-5-6
+        //manager.deleteAllSubtasks(); // 2-3-1
+        System.out.println(manager.getHistory());
+        System.out.println("------------------------------------------------------------------");
+        manager.deleteEpicById(3); // 2
         System.out.println(manager.getHistory());
 
     }
