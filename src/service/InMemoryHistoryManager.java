@@ -1,27 +1,83 @@
 package service;
 
 import model.Task;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private final static int SIZE_OF_VIEWED_TASKS = 10;
-    private final LinkedList<Task> history = new LinkedList<>();
+
+    private Node<Task> head;
+    private Node<Task> tail;
+    private final Map<Integer, Node<Task>> idToNodeTask = new HashMap<>();
 
     @Override
     public void add(Task task) {
-        if (history.size() >= SIZE_OF_VIEWED_TASKS) {
-            history.removeFirst();
-            history.addLast(task);
+        if (task == null) {
             return;
         }
-        history.add(task);
+        if (idToNodeTask.containsKey(task.getId())) {
+            remove(task.getId());
+        }
+        linkLast(task);
+    }
+
+    @Override
+    public void remove(int id) {
+        Node<Task> node = idToNodeTask.get(id);
+        if (node != null) {
+            removeNode(node);
+            idToNodeTask.remove(id);
+        }
     }
 
     @Override
     public List<Task> getHistory() {
-        return new ArrayList<>(history);
+        return new ArrayList<>(getTasks());
+    }
+
+    void linkLast(Task task) {
+        final Node<Task> oldTail = tail;
+        final Node<Task> newNode = new Node<>(oldTail, task, null);
+        tail = newNode;
+        if (oldTail == null)
+            head = newNode;
+        else
+            oldTail.next = newNode;
+        idToNodeTask.put(newNode.data.getId(), newNode);
+    }
+
+    List<Task> getTasks() {
+        List<Task> tasks = new ArrayList<>();
+        Node<Task> currentNode = head;
+        while (currentNode != null) {
+            tasks.add(currentNode.data);
+            currentNode = currentNode.next;
+        }
+        return tasks;
+    }
+
+    void removeNode(Node<Task> node) {
+        final Node<Task> next = node.next;
+        final Node<Task> prev = node.prev;
+
+        if (prev == null) {
+            head = next;
+        } else {
+            prev.next = next;
+            node.prev = null;
+        }
+
+        if (next == null) {
+            tail = prev;
+        } else {
+            next.prev = prev;
+            node.next = null;
+        }
+
+        node.data = null;
     }
 }
+
+
