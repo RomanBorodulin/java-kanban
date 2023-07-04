@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, Subtask> subtasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
-    private int id = 1;
+    protected final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Subtask> subtasks = new HashMap<>();
+    protected final Map<Integer, Epic> epics = new HashMap<>();
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected static int id;
 
     // Методы получения списка всех задач
     @Override
@@ -92,7 +92,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return;
         }
-        task.setId(id++);
+        task.setId(++id);
         tasks.put(task.getId(), task);
     }
 
@@ -101,7 +101,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return;
         }
-        epic.setId(id++);
+        epic.setId(++id);
         epics.put(epic.getId(), epic);
     }
 
@@ -115,7 +115,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (!isEpicExist) {
             return;
         }
-        subtask.setId(id++);
+        subtask.setId(++id);
         // Добавили в мапу подзадачу
         subtasks.put(subtask.getId(), subtask);
         Epic epic = epics.get(epicId);

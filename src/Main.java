@@ -5,6 +5,9 @@ import model.TaskStatus;
 import service.Managers;
 import service.TaskManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -43,5 +46,4 @@ public class Main {
         System.out.println(manager.getHistory());
 
     }
-
 }
