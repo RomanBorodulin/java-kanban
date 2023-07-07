@@ -5,13 +5,11 @@ public class Task {
     protected String description;
     protected int id;
     protected TaskStatus taskStatus;
-    protected TaskType taskType;
 
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.taskStatus = TaskStatus.NEW;
-        taskType = TaskType.TASK;
     }
 
     public Task(String name, String description, TaskStatus taskStatus) {
@@ -40,9 +38,6 @@ public class Task {
     }
 
     public void setId(int id) {
-        /*if (this.id != 0) {
-            return;
-        }*/
         this.id = id;
     }
 
@@ -53,8 +48,9 @@ public class Task {
     public void setTaskStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
     }
-    public TaskType getType(){
-        return taskType;
+
+    public TaskType getType() {
+        return TaskType.TASK;
     }
 
     @Override
