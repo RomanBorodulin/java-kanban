@@ -27,14 +27,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         List<Task> summaryListOfTasks = new ArrayList<>(getListOfAllTasks());
         summaryListOfTasks.addAll(getListOfAllEpics());
         summaryListOfTasks.addAll(getListOfAllSubtasks());
-        Comparator<Task> taskIdComparator = new Comparator<>() {
-            @Override
-            public int compare(Task t1, Task t2) {
-                return Integer.compare(t1.getId(), t2.getId());
-            }
-        };
-        summaryListOfTasks.sort(taskIdComparator);
-        stringBuilder.append(TASK_FIELDS + "\n");
+        summaryListOfTasks.sort(Comparator.comparingInt(Task::getId));
+        if (!summaryListOfTasks.isEmpty()){
+            stringBuilder.append(TASK_FIELDS + "\n");
+        }
         for (Task task : summaryListOfTasks) {
             stringBuilder.append(CSVTaskFormatter.toString(task) + "\n");
         }
@@ -51,7 +47,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     }
 
-    static FileBackedTasksManager loadFromFile(Path path) {
+    public static FileBackedTasksManager loadFromFile(Path path) {
         if (!Files.exists(path)) {
             return new FileBackedTasksManager(path);
         }
@@ -67,10 +63,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла");
         }
-        if (!dataList.isEmpty()) {
-            int rememberId = Integer.parseInt(dataList.get(dataList.size() - 3).split(",", 2)[0]);
+        if (!dataList.isEmpty() && dataList.size() > 3) {
+            String parseInt = dataList.get(dataList.size() - 3).split(",", 2)[0];
+            int rememberId;
+            if (Character.isDigit(parseInt.charAt(0))){
+                rememberId = Integer.parseInt(parseInt);
+            } else {
+                return fileManager;
+            }
+
             dataList.removeFirst();
-            id = rememberId;
+            fileManager.id = rememberId;
 
             for (String data : dataList) {
                 if (data.isEmpty()) {

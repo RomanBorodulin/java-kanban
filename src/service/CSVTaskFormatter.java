@@ -67,7 +67,7 @@ public class CSVTaskFormatter {
         if (stringBuilder.length() > 0) {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
-        return stringBuilder.toString();
+        return stringBuilder + "\n";
     }
 
     static List<Integer> historyFromString(String value) {
