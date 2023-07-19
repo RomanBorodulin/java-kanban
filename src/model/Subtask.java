@@ -1,5 +1,7 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -7,6 +9,13 @@ public class Subtask extends Task {
 
     public Subtask(String name, String description, TaskStatus taskStatus, int epicId) {
         super(name, description, taskStatus);
+        this.epicId = epicId;
+
+    }
+
+    public Subtask(String name, String description, TaskStatus taskStatus, int epicId,
+                   LocalDate startTime, Duration duration) {
+        super(name, description, taskStatus, startTime, duration);
         this.epicId = epicId;
     }
 
@@ -33,6 +42,8 @@ public class Subtask extends Task {
                 ", description='" + description + '\'' +
                 ", id=" + id +
                 ", taskStatus=" + taskStatus +
+                ", duration=" + duration.toMinutes() +
+                ", startTime=" + startTime +
                 ", epicId=" + epicId +
                 '}';
     }

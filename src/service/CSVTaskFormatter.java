@@ -2,6 +2,10 @@ package service;
 
 import model.*;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,21 +13,26 @@ public class CSVTaskFormatter {
     private CSVTaskFormatter() {
     }
 
+    static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
     static String toString(Task task) {
         StringBuilder epicId = new StringBuilder();
         if (task.getType().equals(TaskType.SUBTASK)) {
             epicId.append(((Subtask) task).getEpicId());
         }
         return String.join(",", Integer.toString(task.getId()), task.getType().toString(),
-                task.getName(), task.getTaskStatus().toString(), task.getDescription(), epicId.toString());
+                task.getName(), task.getTaskStatus().toString(), task.getDescription(), epicId.toString(),
+                task.getStartTime().format(DATE_FORMATTER), Long.toString(task.getDuration().toMinutes()),
+                task.getEndTime().format(DATE_TIME_FORMATTER));
 
     }
 
     static Task fromString(String value) {
         final Task task;
         TaskStatus status;
-        String[] elements = value.split(",", -1); //0-id,1-type,2-name,3-status,4-description,5-epic
-
+        String[] elements = value.split(",", -1);
+        //0-id,1-type,2-name,3-status,4-description,5-epic,6-startTime,7-duration,8-endTime
         switch (TaskStatus.valueOf(elements[3])) {
             case NEW:
                 status = TaskStatus.NEW;
@@ -41,20 +50,20 @@ public class CSVTaskFormatter {
         switch (TaskType.valueOf(elements[1])) {
             case EPIC:
                 task = new Epic(elements[2], elements[4]);
-                task.setId(Integer.parseInt(elements[0]));
+                parseTask(task, elements);
+                ((Epic) task).setEndTime(LocalDateTime.parse(elements[8], DATE_TIME_FORMATTER));
                 break;
             case TASK:
                 task = new Task(elements[2], elements[4], status);
-                task.setId(Integer.parseInt(elements[0]));
+                parseTask(task, elements);
                 break;
             case SUBTASK:
                 task = new Subtask(elements[2], elements[4], status, Integer.parseInt(elements[5]));
-                task.setId(Integer.parseInt(elements[0]));
+                parseTask(task, elements);
                 break;
             default:
                 throw new IllegalArgumentException("Тип задачи не существует");
         }
-        task.setId(Integer.parseInt(elements[0]));
         return task;
     }
 
@@ -80,5 +89,11 @@ public class CSVTaskFormatter {
             history.add(Integer.parseInt(element));
         }
         return new ArrayList<>(history);
+    }
+
+    private static void parseTask(Task task, String[] elements) {
+        task.setId(Integer.parseInt(elements[0]));
+        task.setStartTime(LocalDate.parse(elements[6], DATE_FORMATTER));
+        task.setDuration(Duration.ofMinutes(Long.parseLong(elements[7])));
     }
 }
