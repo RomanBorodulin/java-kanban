@@ -6,7 +6,7 @@ import service.InMemoryTaskManager;
 public class InMemoryTasksManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @BeforeEach
-    void beforeEach(){
+    void beforeEach() {
         manager = new InMemoryTaskManager();
     }
 }

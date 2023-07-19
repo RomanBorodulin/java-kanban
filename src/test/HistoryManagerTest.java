@@ -52,7 +52,7 @@ public class HistoryManagerTest {
 
         taskManager.deleteTaskById(3);
         assertEquals(2, taskManager.getHistory().size());
-        assertEquals(List.of(2,4), taskManager.getHistory().stream()
+        assertEquals(List.of(2, 4), taskManager.getHistory().stream()
                 .map(Task::getId).collect(Collectors.toList()));
 
         taskManager.deleteTaskById(4);

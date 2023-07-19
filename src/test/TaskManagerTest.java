@@ -5,9 +5,14 @@ import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.Test;
 
+import service.ManagerSaveException;
 import service.TaskManager;
+
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static model.TaskStatus.DONE;
 import static model.TaskStatus.NEW;
@@ -16,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class TaskManagerTest<T extends TaskManager> {
@@ -269,7 +275,32 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNull(manager.getSubtaskById(6));
         assertEquals(1, manager.getEpicById(3).getSubtasks().size());
         assertEquals(NEW, manager.getEpicById(3).getTaskStatus());
+    }
 
+    @Test
+    void shouldGetListOfPrioritizedTasks() {
+        createTasks();
+        createEpics();
+        manager.createSubtask(new Subtask("Собрать коробки", "", NEW, epicId,
+                LocalDate.parse("18.07.2023", EpicTest.DATE_FORMATTER), Duration.ofMinutes(120L))); //#5
+        manager.createSubtask(new Subtask("Упаковать кошку", "", DONE, epicId,
+                LocalDate.parse("10.07.2023", EpicTest.DATE_FORMATTER), Duration.ofMinutes(11500L))); //#6
+        assertEquals(manager.getListOfAllSubtasks().get(1), manager.getPrioritizedTasks().get(0));
+        assertEquals(List.of(6, 5, 1, 2), manager.getPrioritizedTasks().stream().map(Task::getId)
+                .collect(Collectors.toList()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenIntersectionInTimeIsExist() {
+        createTasks();
+        createEpics();
+        manager.createSubtask(new Subtask("Собрать коробки", "", NEW, epicId,
+                LocalDate.parse("18.07.2023", EpicTest.DATE_FORMATTER), Duration.ofMinutes(12000L))); //#5
+        Subtask interSubtask = new Subtask("Упаковать кошку", "", DONE, epicId,
+                LocalDate.parse("19.07.2023", EpicTest.DATE_FORMATTER), Duration.ofMinutes(11500L)); //#6
+        final ManagerSaveException ex = assertThrows(ManagerSaveException.class,
+                () -> manager.createSubtask(interSubtask));
+        assertEquals("У задачи" + interSubtask + " есть пересечение во времени", ex.getMessage());
     }
 
     List<Task> getExpectedTasks() {
