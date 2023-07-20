@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -15,7 +17,7 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final Path path;
-    private static final String TASK_FIELDS = "id,type,name,status,description,epic";
+    private static final String TASK_FIELDS = "id,type,name,status,description,epic,startTime,duration,endTime";
 
     public FileBackedTasksManager(Path path) {
         this.path = path;
@@ -28,7 +30,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         summaryListOfTasks.addAll(getListOfAllEpics());
         summaryListOfTasks.addAll(getListOfAllSubtasks());
         summaryListOfTasks.sort(Comparator.comparingInt(Task::getId));
-        if (!summaryListOfTasks.isEmpty()){
+        if (!summaryListOfTasks.isEmpty()) {
             stringBuilder.append(TASK_FIELDS + "\n");
         }
         for (Task task : summaryListOfTasks) {
@@ -66,7 +68,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         if (!dataList.isEmpty() && dataList.size() > 3) {
             String parseInt = dataList.get(dataList.size() - 3).split(",", 2)[0];
             int rememberId;
-            if (Character.isDigit(parseInt.charAt(0))){
+            if (Character.isDigit(parseInt.charAt(0))) {
                 rememberId = Integer.parseInt(parseInt);
             } else {
                 return fileManager;
@@ -106,7 +108,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private void loadTask(Task task) {
+        validateCorrectTaskTime(task);
         tasks.put(task.getId(), task);
+        prioritizedTasks.add(new Task(task));
+
     }
 
     private void loadEpic(Epic epic) {
@@ -114,7 +119,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private void loadSubtask(Subtask subtask) {
+        validateCorrectTaskTime(subtask);
         subtasks.put(subtask.getId(), subtask);
+        prioritizedTasks.add(new Subtask(subtask));
     }
 
     @Override
@@ -215,14 +222,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         Path path = Paths.get("backup.csv");
         TaskManager manager = FileBackedTasksManager.loadFromFile(path);
 
-        manager.createTask(new Task("Прочитать книгу", "", TaskStatus.IN_PROGRESS)); //#1
+        manager.createTask(new Task("Прочитать книгу", "", TaskStatus.IN_PROGRESS,
+                LocalDate.parse("18.07.2023", CSVTaskFormatter.DATE_FORMATTER), Duration.ofMinutes(120L))); //#1
         manager.createTask(new Task("Протестировать программу", "", TaskStatus.IN_PROGRESS)); //#2
 
         Epic firstEpic = new Epic("Переезд", ""); //#3
         manager.createEpic(firstEpic);
         int epicId = firstEpic.getId();
-        manager.createSubtask(new Subtask("Собрать коробки", "", TaskStatus.NEW, epicId)); //#4
-        manager.createSubtask(new Subtask("Упаковать кошку", "", TaskStatus.NEW, epicId)); //#5
+        manager.createSubtask(new Subtask("Собрать коробки", "", TaskStatus.NEW, epicId,
+                LocalDate.parse("20.07.2023", CSVTaskFormatter.DATE_FORMATTER), Duration.ofMinutes(1200L))); //#4
+        manager.createSubtask(new Subtask("Упаковать кошку", "", TaskStatus.NEW, epicId,
+                LocalDate.parse("19.07.2023", CSVTaskFormatter.DATE_FORMATTER), Duration.ofMinutes(600L))); //#5
         manager.createSubtask(new Subtask("Заказать перевозку", "", TaskStatus.NEW, epicId)); //#6
 
         Epic secondEpic = new Epic("Важный эпик 2", "Очень важный без подзадач"); //#7
@@ -241,6 +251,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         manager.deleteTaskById(2);
         manager.getTaskById(8);
         System.out.println(manager.getListOfAllTasks());
+        System.out.println(manager.getPrioritizedTasks());
 
     }
 }
