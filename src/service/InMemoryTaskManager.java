@@ -41,22 +41,22 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public ArrayList<Task> getListOfAllTasks() {
         final List<Task> tasks = new ArrayList<>(this.tasks.values());
-        return tasks.stream()
-                .map(Task::new).collect(Collectors.toCollection(ArrayList::new));
+        return tasks.stream().map(Task::new)
+                .sorted(Comparator.comparing(Task::getId)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
     public ArrayList<Epic> getListOfAllEpics() {
         final List<Epic> epics = new ArrayList<>(this.epics.values());
-        return epics.stream()
-                .map(Epic::new).collect(Collectors.toCollection(ArrayList::new));
+        return epics.stream().map(Epic::new)
+                .sorted(Comparator.comparing(Task::getId)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
     public ArrayList<Subtask> getListOfAllSubtasks() {
         final List<Subtask> subtasks = new ArrayList<>(this.subtasks.values());
-        return subtasks.stream()
-                .map(Subtask::new).collect(Collectors.toCollection(ArrayList::new));
+        return subtasks.stream().map(Subtask::new)
+                .sorted(Comparator.comparing(Task::getId)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     // Удаление всех задач
@@ -151,7 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
         int epicId = subtask.getEpicId();
         boolean isEpicExist = epics.containsKey(epicId);
         if (!isEpicExist) {
-            return;
+            throw new ManagerSaveException("Эпик с таким id не существует");
         }
         validateCorrectTaskTime(subtask);
         subtask.setId(++id);
@@ -167,11 +167,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         if (task == null) {
-            return;
+            throw new ManagerSaveException("Получена нулевая задача");
         }
         boolean isTaskExist = tasks.containsKey(task.getId());
         if (!isTaskExist) {
-            return;
+            throw new ManagerSaveException("Задача с таким id не существует");
         }
         if (prioritizedTasks.contains(tasks.get(task.getId()))) {
             prioritizedTasks.remove(tasks.get(task.getId()));
@@ -185,11 +185,14 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateEpic(Epic epic) {
         if (epic == null) {
-            return;
+            throw new ManagerSaveException("Получен нулевой эпик");
         }
         boolean isEpicExist = epics.containsKey(epic.getId());
         if (!isEpicExist) {
-            return;
+            throw new ManagerSaveException("Эпик с таким id не существует");
+        }
+        if (!subtasks.keySet().containsAll(epic.getSubtasks())) {
+            throw new ManagerSaveException("При обновлении был получен эпик с неправильными подзадачами");
         }
         changeEpicStatus(epic);
         calculateEpicTime(epic);
@@ -200,12 +203,12 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         if (subtask == null) {
-            return;
+            throw new ManagerSaveException("Получена нулевая подзадача");
         }
         boolean isSubtaskExist = subtasks.containsKey(subtask.getId());
         boolean isEpicExist = epics.containsKey(subtask.getEpicId());
         if (!isSubtaskExist || !isEpicExist) {
-            return;
+            throw new ManagerSaveException("Подзадача и/или эпик с таким id не существуют");
         }
         if (prioritizedTasks.contains(subtasks.get(subtask.getId()))) {
             prioritizedTasks.remove(subtasks.get(subtask.getId()));
@@ -236,7 +239,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteTaskById(int id) {
         boolean isTaskExist = tasks.containsKey(id);
         if (!isTaskExist) {
-            return;
+            throw new ManagerRemoveException("Невозможно удалить задачу с несуществующим id");
         }
         historyManager.remove(id);
         prioritizedTasks.remove(tasks.get(id));
@@ -247,7 +250,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteEpicById(int id) {
         boolean isEpicExist = epics.containsKey(id);
         if (!isEpicExist) {
-            return;
+            throw new ManagerRemoveException("Невозможно удалить эпик с несуществующим id");
         }
         for (Integer key : epics.get(id).getSubtasks()) {
             historyManager.remove(key);
@@ -262,7 +265,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteSubtaskById(int id) {
         boolean isSubtaskExist = subtasks.containsKey(id);
         if (!isSubtaskExist) {
-            return;
+            throw new ManagerRemoveException("Невозможно удалить подзадачу с несуществующим id");
         }
         Epic epic = epics.get(subtasks.get(id).getEpicId());
         historyManager.remove(id);

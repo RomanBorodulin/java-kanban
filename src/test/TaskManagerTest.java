@@ -5,6 +5,7 @@ import model.Subtask;
 import model.Task;
 import org.junit.jupiter.api.Test;
 
+import service.ManagerRemoveException;
 import service.ManagerSaveException;
 import service.TaskManager;
 
@@ -178,10 +179,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, tasks.size());
 
         savedTask.setId(-1);
-        manager.updateTask(savedTask);
-        tasks = manager.getListOfAllTasks();
-        assertNull(manager.getTaskById(savedTask.getId()));
-        assertNotEquals(-1, tasks.get(0).getId());
+        ManagerSaveException ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateTask(savedTask));
+        assertEquals("Задача с таким id не существует", ex.getMessage());
+        ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateTask(null));
+        assertEquals("Получена нулевая задача", ex.getMessage());
+
     }
 
     @Test
@@ -202,10 +206,18 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, epics.size());
 
         savedEpic.setId(-1);
-        manager.updateEpic(savedEpic);
-        epics = manager.getListOfAllEpics();
-        assertNull(manager.getEpicById(savedEpic.getId()));
-        assertNotEquals(-1, epics.get(0).getId());
+        ManagerSaveException ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateEpic(savedEpic));
+        assertEquals("Эпик с таким id не существует", ex.getMessage());
+        ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateEpic(null));
+        assertEquals("Получен нулевой эпик", ex.getMessage());
+
+        savedEpic.setId(1);
+        savedEpic.setSubtasks(new ArrayList<>(List.of(-1,-2,-3)));
+        ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateEpic(savedEpic));
+        assertEquals("При обновлении был получен эпик с неправильными подзадачами", ex.getMessage());
     }
 
     @Test
@@ -233,10 +245,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(DONE, epics.get(0).getTaskStatus());
 
         saveSubtask.setId(-1);
-        manager.updateSubtask(saveSubtask);
-        subtasks = manager.getListOfAllSubtasks();
-        assertNull(manager.getSubtaskById(saveSubtask.getId()));
-        assertNotEquals(-1, subtasks.get(0).getId());
+        ManagerSaveException ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateSubtask(saveSubtask));
+        assertEquals("Подзадача и/или эпик с таким id не существуют", ex.getMessage());
+        saveSubtask.setEpicId(-1);
+        ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateSubtask(saveSubtask));
+        assertEquals("Подзадача и/или эпик с таким id не существуют", ex.getMessage());
+        ex = assertThrows(ManagerSaveException.class,
+                () -> manager.updateSubtask(null));
+        assertEquals("Получена нулевая подзадача", ex.getMessage());
 
     }
 
@@ -261,11 +279,27 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
+    void shouldThrowExceptionWhenDeleteTaskByNonExistId() {
+        createAll();
+        ManagerRemoveException ex = assertThrows(ManagerRemoveException.class,
+                () -> manager.deleteTaskById(-1));
+        assertEquals("Невозможно удалить задачу с несуществующим id", ex.getMessage());
+    }
+
+    @Test
     void shouldDeleteEpicByIdWhenIdIsExistIncludingAllEpicSubtasks() {
         createAll();
         manager.deleteEpicById(3);
         assertNull(manager.getEpicById(3));
         assertTrue(manager.getListOfAllSubtasks().isEmpty());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeleteEpicByNonExistId() {
+        createAll();
+        ManagerRemoveException ex = assertThrows(ManagerRemoveException.class,
+                () -> manager.deleteEpicById(-1));
+        assertEquals("Невозможно удалить эпик с несуществующим id", ex.getMessage());
     }
 
     @Test
@@ -275,6 +309,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertNull(manager.getSubtaskById(6));
         assertEquals(1, manager.getEpicById(3).getSubtasks().size());
         assertEquals(NEW, manager.getEpicById(3).getTaskStatus());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeleteSubtaskByNonExistId() {
+        createAll();
+        ManagerRemoveException ex = assertThrows(ManagerRemoveException.class,
+                () -> manager.deleteSubtaskById(-1));
+        assertEquals("Невозможно удалить подзадачу с несуществующим id", ex.getMessage());
     }
 
     @Test
