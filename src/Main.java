@@ -2,13 +2,18 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.TaskStatus;
+import server.KVServer;
 import service.Managers;
 import service.TaskManager;
 
+import java.io.IOException;
+
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        new KVServer().start();
         TaskManager manager = Managers.getDefault();
+
 
         manager.createTask(new Task("Прочитать книгу", "", TaskStatus.IN_PROGRESS)); //#1
         manager.createTask(new Task("Протестировать программу", "", TaskStatus.IN_PROGRESS)); //#2
@@ -34,13 +39,10 @@ public class Main {
         System.out.println(manager.getHistory()); // 2-3-4-1-5-6
         System.out.println("------------------------------------------------------------------");
         manager.deleteTaskById(1); // 2-3-4-5-6
-        //manager.deleteAllEpics(); // 2-1
-        //manager.deleteAllTasks(); // 3-4-5-6
-        //manager.deleteAllSubtasks(); // 2-3-1
         System.out.println(manager.getHistory());
         System.out.println("------------------------------------------------------------------");
-        manager.deleteEpicById(3); // 2
-        System.out.println(manager.getHistory());
-
+        manager = Managers.getDefault();
+        //manager.deleteEpicById(3); // 2
+        //System.out.println(manager.getHistory());
     }
 }
