@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
-    private final ArrayList<Integer> subtasksId = new ArrayList<>();
+    private ArrayList<Integer> subtasksId = new ArrayList<>();
     private LocalDateTime endTime;
 
     public Epic(String name, String description) {
@@ -23,6 +23,10 @@ public class Epic extends Task {
 
     public ArrayList<Integer> getSubtasks() {
         return new ArrayList<>(subtasksId);
+    }
+
+    public void setSubtasks(final ArrayList<Integer> subtasksId) {
+        this.subtasksId = new ArrayList<>(subtasksId);
     }
 
     public void clearAllSubtasks() {

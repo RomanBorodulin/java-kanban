@@ -9,7 +9,7 @@ import java.util.Objects;
 public class Task {
     protected String name;
     protected String description;
-    protected int id;
+    protected int id = 0;
     protected TaskStatus taskStatus;
     protected Duration duration; //in minutes
     protected LocalDate startTime;
