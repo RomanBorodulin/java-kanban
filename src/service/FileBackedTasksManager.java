@@ -19,12 +19,16 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private final Path path;
     private static final String TASK_FIELDS = "id,type,name,status,description,epic,startTime,duration,endTime";
 
+    protected FileBackedTasksManager() {
+        path = Paths.get("backup.csv");
+    }
+
     public FileBackedTasksManager(Path path) {
         this.path = path;
 
     }
 
-    private void save() {
+    protected void save() {
         StringBuilder stringBuilder = new StringBuilder();
         List<Task> summaryListOfTasks = new ArrayList<>(getListOfAllTasks());
         summaryListOfTasks.addAll(getListOfAllEpics());
