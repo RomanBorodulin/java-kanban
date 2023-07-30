@@ -17,34 +17,59 @@ public class KVTaskClient {
         apiToken = getApiToken(url);
     }
 
-    public void put(String key, String json) throws IOException, InterruptedException {
+    public void put(String key, String json) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/save/" + key + "?API_TOKEN=" + apiToken))
                 .POST(HttpRequest.BodyPublishers.ofString(json)).build();
-        client.send(request, HttpResponse.BodyHandlers.ofString());
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                throw new KVTaskClientException("Что-то пошло не так. Сервер вернул код состояния: "
+                        + response.statusCode());
+            }
+        } catch (IOException | InterruptedException ex) {
+            throw new KVTaskClientException("Во время выполнения сохранения возникла ошибка.");
+        }
+
     }
 
-    public String load(String key) throws IOException, InterruptedException {
+    public String load(String key) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/load/" + key + "?API_TOKEN=" + apiToken)).GET().build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                return response.body();
+            } else {
+                throw new KVTaskClientException("Что-то пошло не так. Сервер вернул код состояния: "
+                        + response.statusCode());
+            }
+        } catch (IOException | InterruptedException ex) {
+            throw new KVTaskClientException("Во время выполнения загрузки возникла ошибка.");
+        }
     }
 
     private String getApiToken(final URI url) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url + "/register")).GET().build();
-        String token = null;
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
-                token = response.body();
+                return response.body();
             } else {
-                System.out.println("Что-то пошло не так. Сервер вернул код состояния: " + response.statusCode());
+                throw new KVTaskClientException("Что-то пошло не так. Сервер вернул код состояния: "
+                        + response.statusCode());
             }
         } catch (IOException | InterruptedException ex) {
-            System.out.println("Во время выполнения регистрации возникла ошибка.\n" +
+            throw new KVTaskClientException("Во время выполнения регистрации возникла ошибка.\n" +
                     "Проверьте, пожалуйста, адрес и повторите попытку.");
         }
-        return token;
+    }
+
+    static class KVTaskClientException extends RuntimeException {
+        public KVTaskClientException(String message) {
+            super(message);
+        }
     }
 }
+
