@@ -35,7 +35,7 @@ public class HttpTaskServerTest {
     KVServer kvServer;
     HttpTaskServer httpTaskServer;
     static HttpClient client;
-    static KVTaskClient kvTaskClient;
+    KVTaskClient kvTaskClient;
     static Gson gson;
     Task taskFromJson;
     Epic epicFromJson;
@@ -52,20 +52,19 @@ public class HttpTaskServerTest {
 
     @BeforeAll
     static void beforeAll() {
-
         gson = new GsonBuilder().setPrettyPrinting().serializeNulls()
                 .registerTypeAdapter(Task.class, new Adapters.TaskAdapter())
                 .registerTypeAdapter(Epic.class, new Adapters.EpicAdapter())
                 .registerTypeAdapter(Subtask.class, new Adapters.SubtaskAdapter())
                 .create();
         client = HttpClient.newHttpClient();
-        kvTaskClient = new KVTaskClient(URI.create("http://localhost:" + KVServer.PORT));
     }
 
     @BeforeEach
     void beforeEach() throws IOException {
         kvServer = new KVServer();
         kvServer.start();
+        kvTaskClient = new KVTaskClient(URI.create("http://localhost:" + KVServer.PORT));
         httpTaskServer = new HttpTaskServer();
         httpTaskServer.start();
         initializeTasks();

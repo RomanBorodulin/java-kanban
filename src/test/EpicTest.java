@@ -3,11 +3,14 @@ package test;
 import model.Epic;
 import model.Subtask;
 import model.TaskStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.KVServer;
 import service.Managers;
 import service.TaskManager;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,17 +24,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EpicTest {
     TaskManager manager;
+    KVServer kvServer;
     Epic epic;
     int epicId;
     static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
     static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws IOException {
+        kvServer = new KVServer();
+        kvServer.start();
         epic = new Epic("Переезд", "Большой переезд");
         manager = Managers.getDefault();
         manager.createEpic(epic);
         epicId = epic.getId();
+    }
+
+    @AfterEach
+    void afterEach() {
+        kvServer.stop();
     }
 
     @Test

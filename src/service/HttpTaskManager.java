@@ -8,7 +8,6 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,16 +33,12 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
     @Override
     protected void save() {
-        try {
-            client.put("tasks", gson.toJson(tasks));
-            client.put("epics", gson.toJson(epics));
-            client.put("subtasks", gson.toJson(subtasks));
-            client.put("history", gson.toJson(getHistory().stream()
-                    .map(Task::getId).collect(Collectors.toList())));
-            client.put("prioritizedTasks", gson.toJson(getPrioritizedTasks()));
-        } catch (IOException | InterruptedException ex) {
-            System.out.println("Во время выполнения сохранения возникла ошибка.\n");
-        }
+        client.put("tasks", gson.toJson(tasks));
+        client.put("epics", gson.toJson(epics));
+        client.put("subtasks", gson.toJson(subtasks));
+        client.put("history", gson.toJson(getHistory().stream()
+                .map(Task::getId).collect(Collectors.toList())));
+        client.put("prioritizedTasks", gson.toJson(getPrioritizedTasks()));
     }
 
     private void load() {
@@ -72,7 +67,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
             allIdTasks.addAll(subtasks.keySet());
             id = allIdTasks.stream().max(Integer::compareTo).orElse(0);
         } catch (Exception ex) {
-            System.out.println("Во время выполнения загрузки возникла ошибка.\n");
+            ex.printStackTrace();
         }
     }
 }

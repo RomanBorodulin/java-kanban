@@ -89,7 +89,6 @@ public final class Adapters {
                 jsonWriter.value(integer);
             }
             jsonWriter.endArray();
-            //jsonWriter.name("subtasksId").value(epic.getSubtasks().toString());
             jsonWriter.name("endTime").value(epic.getEndTime().format(DATE_TIME_FORMATTER));
             jsonWriter.endObject();
         }

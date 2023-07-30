@@ -1,12 +1,15 @@
 package test;
 
 import model.Task;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import server.KVServer;
 import service.HistoryManager;
 import service.Managers;
 import service.TaskManager;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +20,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HistoryManagerTest {
     TaskManager taskManager;
+    KVServer kvServer;
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws IOException {
+        kvServer = new KVServer();
+        kvServer.start();
         taskManager = Managers.getDefault();
         Arrays.asList(1, 2, 3, 4).forEach(i ->
                 taskManager.createTask(new Task("task" + i, "description" + i)));
 
+    }
+    @AfterEach
+    void afterEach() {
+        kvServer.stop();
     }
 
     @Test
